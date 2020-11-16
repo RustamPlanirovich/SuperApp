@@ -6,6 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.dynamiclinks.ktx.dynamicLinks
+import com.google.firebase.dynamiclinks.ktx.shortLinkAsync
+import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.link_item.*
 import kotlinx.android.synthetic.main.link_item.view.*
 
 private const val POST_TYPE_DESC: Int = 0
@@ -13,7 +17,7 @@ private const val POST_TYPE_IMAGE: Int = 1
 
 class PostAdapter(
     var postListItem: List<PostModel>,
-    val clickListener: (PostModel) -> Unit
+    var clickListener: (PostModel, View) -> Unit
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -21,27 +25,32 @@ class PostAdapter(
     class DescViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bing(
             postModel: PostModel,
-            clickListener: (PostModel) -> Unit
+            clickListener: (PostModel, View) -> Unit
         ) {
 
             itemView.linkName.text = postModel.linkName
             itemView.linkAddress.text = postModel.addressLink
 
+
+
             itemView.goLinkButton.setOnClickListener {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(postModel.addressLink))
-                itemView.context.startActivity(browserIntent)
+                clickListener(postModel, it)
             }
 
+            itemView.delLinkButton.setOnClickListener {
+                clickListener(postModel, it)
+            }
 
-            itemView.setOnClickListener {
-                clickListener(postModel)
+            itemView.linkItemCard.setOnClickListener {
+                clickListener(postModel, it)
+
             }
 
         }
     }
 
     class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bing(postModel: PostModel, clickListener: (PostModel) -> Unit) {
+        fun bing(postModel: PostModel, clickListener: (PostModel, View) -> Unit) {
 
         }
     }
@@ -57,6 +66,7 @@ class PostAdapter(
             return ImageViewHolder(view)
         }
     }
+
 
     override fun getItemCount(): Int {
         return postListItem.size
@@ -77,5 +87,4 @@ class PostAdapter(
             (holder as ImageViewHolder).bing(postListItem[position], clickListener)
         }
     }
-
 }

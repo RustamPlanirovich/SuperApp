@@ -93,10 +93,25 @@
 
         </nl.bryanderidder.themedtogglebuttongroup.ThemedToggleButtonGroup>
 
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/addLinkButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/time" />
+
         <soup.neumorphism.NeumorphButton
             android:id="@+id/addLinkButton"
             android:layout_width="72dp"
             android:layout_height="71dp"
+            android:layout_gravity="bottom|end"
             android:layout_marginEnd="32dp"
             android:layout_marginBottom="32dp"
             android:drawablePadding="8dp"
@@ -106,19 +121,13 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/addLinkButton"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/time" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <include layout="@layout/link_add_bottom_sheet"/>
+    <include layout="@layout/link_add_bottom_sheet" />
+
+
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

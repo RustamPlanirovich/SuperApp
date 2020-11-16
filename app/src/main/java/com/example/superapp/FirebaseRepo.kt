@@ -11,7 +11,7 @@ import com.google.firebase.firestore.QuerySnapshot
 class FirebaseRepo{
 
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val firebaseFirestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+     val firebaseFirestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     fun getUser(): FirebaseUser?{
         return firebaseAuth.currentUser
@@ -22,6 +22,7 @@ class FirebaseRepo{
     }
 
     fun getPostList(): Task<QuerySnapshot> {
+
         return firebaseFirestore
             .collection("SuperApp")
             .orderBy("id", Query.Direction.DESCENDING)

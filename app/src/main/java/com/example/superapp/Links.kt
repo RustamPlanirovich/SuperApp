@@ -1,24 +1,27 @@
 package com.example.superapp
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.firebase.Timestamp
+import com.google.firebase.dynamiclinks.ktx.dynamicLinks
+import com.google.firebase.dynamiclinks.ktx.shortLinkAsync
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_links.*
 import kotlinx.android.synthetic.main.link_add_bottom_sheet.*
-import kotlinx.android.synthetic.main.link_item.*
 import kotlinx.android.synthetic.main.link_item.view.*
-import www.sanju.motiontoast.MotionToast
 import java.util.*
 
 
-class Links : AppCompatActivity(), (PostModel) -> Unit {
+class Links : AppCompatActivity(), (PostModel, View) -> Unit {
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
     lateinit var bottomSheetLayout: ConstraintLayout
@@ -31,6 +34,8 @@ class Links : AppCompatActivity(), (PostModel) -> Unit {
 
     lateinit var documName: String
 
+    lateinit var addDocName: Timestamp
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +46,26 @@ class Links : AppCompatActivity(), (PostModel) -> Unit {
         db = FirebaseFirestore.getInstance()
 
 
+
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = postListAdapter
+
+        allLinks.setOnClickListener {
+            db.disableNetwork()
+                .addOnCompleteListener { Log.d("2", "Error: ") }
+                .addOnFailureListener { e -> Log.w("2", "Error writing document", e) }
+            firebaseRepo.firebaseFirestore.disableNetwork()
+                .addOnCompleteListener { Log.d("2", "Error: ") }
+                .addOnFailureListener { e -> Log.w("2", "Error writing document", e) }
+        }
+        countLinks.setOnClickListener {
+            db.enableNetwork()
+                .addOnSuccessListener { Log.d("3", "Error: ") }
+                .addOnFailureListener { e -> Log.w("3", "Error writing document", e) }
+            firebaseRepo.firebaseFirestore.enableNetwork()
+                .addOnSuccessListener { Log.d("3", "Error: ") }
+                .addOnFailureListener { e -> Log.w("3", "Error writing document", e) }
+        }
 
         if (firebaseRepo.getUser() == null) {
             firebaseRepo.createUser().addOnCompleteListener {
@@ -56,22 +79,41 @@ class Links : AppCompatActivity(), (PostModel) -> Unit {
             loadPostData()
         }
 
+        db.collection("SuperApp")
+            .whereEqualTo("id", "0")
+            .addSnapshotListener { value, e ->
+                if (e != null) {
+                    Log.w("TAG", "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+
+                val cities = ArrayList<String>()
+                for (doc in value!!) {
+                    postList = value.toObjects(PostModel::class.java)
+                    postListAdapter.postListItem = postList
+                    postListAdapter.notifyDataSetChanged()
+                }
+                Log.d("TAG", "Current cites in CA: $cities")
+            }
+
         addLink.setOnClickListener {
+            addDocName = Timestamp(Date())
             val city = Link(
                 nameLink.text.toString(),
                 addressLink.text.toString(),
                 commentLink.text.toString(),
                 "0",
-                Timestamp(Date()).toString()
+                addDocName.toString()
             )
 
             db.collection("SuperApp")
-                .document(Timestamp(Date()).toString())
+                .document(addDocName.toString())
                 .set(city)
                 .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully written!") }
                 .addOnFailureListener { e -> Log.w("TAG", "Error writing document", e) }
 
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            postListAdapter.notifyDataSetChanged()
         }
 
 
@@ -79,7 +121,7 @@ class Links : AppCompatActivity(), (PostModel) -> Unit {
             BottomSheetBehavior.BottomSheetCallback() {
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                // handle onSlide
+
             }
 
             override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -89,7 +131,7 @@ class Links : AppCompatActivity(), (PostModel) -> Unit {
                         recyclerView.visibility = View.VISIBLE
                     }
                     BottomSheetBehavior.STATE_SETTLING -> {
-                        addLinkButton.visibility = View.GONE
+                        //addLinkButton.visibility = View.GONE
                         recyclerView.visibility = View.GONE
                     }
                 }
@@ -97,11 +139,13 @@ class Links : AppCompatActivity(), (PostModel) -> Unit {
         })
 
         addLinkButton.setOnClickListener {
-            if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED)
+            if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            else
+            } else {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
         }
+
 
         changeLink.setOnClickListener {
             val sfDocRef = db.collection("SuperApp").document(documName)
@@ -111,14 +155,24 @@ class Links : AppCompatActivity(), (PostModel) -> Unit {
 
                 // Note: this could be done without a transaction
                 //       by updating the population using FieldValue.increment()
-                val newPopulation = snapshot.getDouble("Hello APP")
                 transaction.update(sfDocRef, "linkName", nameLink.text.toString())
                 transaction.update(sfDocRef, "addressLink", addressLink.text.toString())
                 transaction.update(sfDocRef, "commentLink", commentLink.text.toString())
                 // Success
                 null
-            }.addOnSuccessListener { Log.d("TAG", "Transaction success!") }
-                .addOnFailureListener { e -> Log.w("TAG", "Transaction failure.", e) }
+            }.addOnSuccessListener {
+                Log.d("Update", "Transaction success! + ${documName}")
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                addLink.visibility = View.VISIBLE
+                changeLink.visibility = View.GONE
+            }
+                .addOnFailureListener { e ->
+                    Log.w(
+                        "Update",
+                        "Transaction failure. + ${documName}",
+                        e
+                    )
+                }
         }
     }
 
@@ -137,21 +191,41 @@ class Links : AppCompatActivity(), (PostModel) -> Unit {
     }
 
 
+    override fun invoke(postModel: PostModel, itemView: View) {
 
-    override fun invoke(postModel: PostModel) {
+        when (itemView) {
+            itemView.goLinkButton -> {
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(postModel.addressLink))
+                startActivity(browserIntent)
+            }
+            itemView.delLinkButton -> {
+                db.collection("SuperApp").document(postModel.docName)
+                    .delete()
+                    .addOnSuccessListener {
+                        Log.d(
+                            "Delete",
+                            "DocumentSnapshot successfully deleted! + ${postModel.docName}"
+                        )
+                    }
+                    .addOnFailureListener { e -> Log.w("Delete", "Error deleting document", e) }
+            }
+            itemView.linkItemCard -> {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                addLink.visibility = View.GONE
+                changeLink.visibility = View.VISIBLE
+                nameLink.setText(postModel.linkName)
+                addressLink.setText(postModel.addressLink)
+                commentLink.setText(postModel.commentLink)
+                documName = postModel.docName
 
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-        addLink.visibility = View.GONE
-        changeLink.visibility = View.VISIBLE
-        nameLink.setText(postModel.linkName)
-        addressLink.setText(postModel.addressLink)
-        commentLink.setText(postModel.commentLink)
-        documName = postModel.docName
+
+            }
+        }
 
 
         //Toast
 //        MotionToast.darkToast(this,
-//            "Hurray success 😍",
+//            "${postModel.docName}",
 //            "Upload Completed successfully!",
 //            MotionToast.TOAST_NO_INTERNET,
 //            MotionToast.GRAVITY_BOTTOM,
@@ -159,13 +233,6 @@ class Links : AppCompatActivity(), (PostModel) -> Unit {
 //            ResourcesCompat.getFont(this,R.font.helvetica_regular))
     }
 
-    fun del() {
-        this.db.collection("SuperApp").document(documName)
-            .delete()
-            .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully deleted!") }
-            .addOnFailureListener { e -> Log.w("TAG", "Error deleting document", e) }
-
-    }
 
     data class Link(
         val linkName: String? = null,
@@ -174,4 +241,5 @@ class Links : AppCompatActivity(), (PostModel) -> Unit {
         val id: String? = null,
         val docName: String? = null
     )
+
 }
