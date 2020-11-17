@@ -5,20 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <soup.neumorphism.NeumorphCardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/linkItemCard"
         style="@style/Widget.Neumorph.CardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:neumorph_shapeType="flat">
 
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/one"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
+
 
             <TextView
                 android:id="@+id/linkName"
@@ -41,37 +46,99 @@
                 android:layout_marginBottom="16dp"
                 android:text="android-arsenal.com"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/goLinkButton"
+                app:layout_constraintEnd_toStartOf="@+id/fabMenu"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/linkName" />
 
-            <soup.neumorphism.NeumorphButton
-                android:id="@+id/goLinkButton"
+
+            <soup.neumorphism.NeumorphImageButton
+                android:id="@+id/fabMenu"
                 style="@style/Widget.Neumorph.Button"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:layout_marginEnd="16dp"
-                android:drawablePadding="8dp"
-                android:text="@string/vertical_ellipsis"
-                android:textSize="18sp"
-                android:textStyle="bold"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/delLinkButton" />
+                app:srcCompat="@drawable/ic_baseline_menu_24" />
 
-            <soup.neumorphism.NeumorphButton
-                android:id="@+id/delLinkButton"
+            <soup.neumorphism.NeumorphImageButton
+                android:id="@+id/fabEditLink"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:clickable="true"
                 style="@style/Widget.Neumorph.Button"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:layout_marginEnd="16dp"
-                android:text="X"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:visibility="gone"
+                app:layout_constraintCircle="@id/fabMenu"
+                app:layout_constraintCircleAngle="315"
+                app:layout_constraintCircleRadius="60dp"
+                app:srcCompat="@drawable/ic_baseline_edit_24"
+                tools:layout_editor_absoluteX="244dp"
+                tools:layout_editor_absoluteY="30dp" />
+
+            <soup.neumorphism.NeumorphImageButton
+                android:id="@+id/fabDelButton"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:clickable="true"
+                android:visibility="gone"
+                style="@style/Widget.Neumorph.Button"
+                app:layout_constraintCircle="@id/fabMenu"
+                app:layout_constraintCircleAngle="270"
+                app:layout_constraintCircleRadius="60dp"
+                app:srcCompat="@drawable/ic_baseline_delete_24"
+                tools:layout_editor_absoluteX="278dp"
+                tools:layout_editor_absoluteY="100dp" />
+
+            <soup.neumorphism.NeumorphImageButton
+                android:id="@+id/fabGoLink"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:clickable="true"
+                android:visibility="gone"
+                style="@style/Widget.Neumorph.Button"
+                app:layout_constraintCircle="@id/fabMenu"
+                app:layout_constraintCircleAngle="0"
+                app:layout_constraintCircleRadius="60dp"
+                app:srcCompat="@drawable/ic_baseline_link_24"
+                tools:layout_editor_absoluteX="349dp" />
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="fabAttachFile,fabCamera,fabAudio" />
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </soup.neumorphism.NeumorphCardView>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/commentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linkItemCard">
+
+        <TextView
+            android:id="@+id/commentTextView2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="Comment"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

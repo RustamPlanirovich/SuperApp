@@ -5,6 +5,7 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.dynamiclinks.ktx.dynamicLinks
 import com.google.firebase.dynamiclinks.ktx.shortLinkAsync
@@ -30,20 +31,37 @@ class PostAdapter(
 
             itemView.linkName.text = postModel.linkName
             itemView.linkAddress.text = postModel.addressLink
+            itemView.commentTextView2.text = postModel.commentLink
 
 
-
-            itemView.goLinkButton.setOnClickListener {
+            itemView.fabMenu.setOnClickListener {
+                if (itemView.fabGoLink.isVisible) {
+                    itemView.fabGoLink.visibility = View.GONE
+                    itemView.fabEditLink.visibility = View.GONE
+                    itemView.fabDelButton.visibility = View.GONE
+                } else {
+                    itemView.fabGoLink.visibility = View.VISIBLE
+                    itemView.fabEditLink.visibility = View.VISIBLE
+                    itemView.fabDelButton.visibility = View.VISIBLE
+                }
+            }
+            itemView.fabGoLink.setOnClickListener {
+                clickListener(postModel, it)
+            }
+            itemView.fabEditLink.setOnClickListener {
+                clickListener(postModel, it)
+            }
+            itemView.fabDelButton.setOnClickListener {
                 clickListener(postModel, it)
             }
 
-            itemView.delLinkButton.setOnClickListener {
-                clickListener(postModel, it)
-            }
+            itemView.setOnClickListener {
+                if (itemView.commentTextView2.isVisible){
+                    itemView.commentTextView2.visibility = View.GONE
+                }else{
+                    itemView.commentTextView2.visibility = View.VISIBLE
 
-            itemView.linkItemCard.setOnClickListener {
-                clickListener(postModel, it)
-
+                }
             }
 
         }

@@ -5,16 +5,15 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.firebase.Timestamp
-import com.google.firebase.dynamiclinks.ktx.dynamicLinks
-import com.google.firebase.dynamiclinks.ktx.shortLinkAsync
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_links.*
 import kotlinx.android.synthetic.main.link_add_bottom_sheet.*
 import kotlinx.android.synthetic.main.link_item.view.*
@@ -23,29 +22,53 @@ import java.util.*
 
 class Links : AppCompatActivity(), (PostModel, View) -> Unit {
 
+    //Объявляем BottomSheetBehavior
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
+    //Объявляем view слоя
     lateinit var bottomSheetLayout: ConstraintLayout
+    //Объявляем базу данных
     lateinit var db: FirebaseFirestore
-
+    //Объявляем класс проверки пользователя
     private val firebaseRepo: FirebaseRepo = FirebaseRepo()
+    //Объявляем лист для загрузки данных
     private var postList: List<PostModel> = ArrayList()
-
+    //Объявляем Адаптер для RecyclerView
     private val postListAdapter: PostAdapter = PostAdapter(postList, this)
-
+    //Объявляем имя документа над которым идет работа (создание удаление редактирование)
     lateinit var documName: String
-
+    //Объявляем имя документа для верного сохранения
     lateinit var addDocName: Timestamp
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_links)
+        //Скрываем ActionBar
         supportActionBar?.hide()
+        //Инициализация всего что связано с BottomSheet
         bottomSheetLayout = findViewById<ConstraintLayout>(R.id.bottomSheet)
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+        //Инициализация базы данных
         db = FirebaseFirestore.getInstance()
 
 
+
+
+        Links()
+            .onBackPressedDispatcher
+            .addCallback(this, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    Log.d("TAG", "Fragment back pressed invoked")
+                    // Do custom work here
+                    bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED
+                    // if you want onBackPressed() to be called as normal afterwards
+                    if (isEnabled) {
+                        isEnabled = false
+                        Links().onBackPressed()
+                    }
+                }
+            }
+            )
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = postListAdapter
@@ -148,31 +171,19 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
 
 
         changeLink.setOnClickListener {
-            val sfDocRef = db.collection("SuperApp").document(documName)
 
-            db.runTransaction { transaction ->
-                val snapshot = transaction.get(sfDocRef)
+            val washingtonRef = db.collection("SuperApp").document(documName)
 
-                // Note: this could be done without a transaction
-                //       by updating the population using FieldValue.increment()
-                transaction.update(sfDocRef, "linkName", nameLink.text.toString())
-                transaction.update(sfDocRef, "addressLink", addressLink.text.toString())
-                transaction.update(sfDocRef, "commentLink", commentLink.text.toString())
-                // Success
-                null
-            }.addOnSuccessListener {
-                Log.d("Update", "Transaction success! + ${documName}")
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                addLink.visibility = View.VISIBLE
-                changeLink.visibility = View.GONE
-            }
-                .addOnFailureListener { e ->
-                    Log.w(
-                        "Update",
-                        "Transaction failure. + ${documName}",
-                        e
-                    )
-                }
+            washingtonRef.update(
+                mapOf(
+                    "linkName" to nameLink.text.toString(),
+                    "addressLink" to addressLink.text.toString(),
+                    "commentLink" to commentLink.text.toString()
+                )
+            ).addOnSuccessListener {}
+                .addOnFailureListener {}
+
+
         }
     }
 
@@ -194,11 +205,11 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
     override fun invoke(postModel: PostModel, itemView: View) {
 
         when (itemView) {
-            itemView.goLinkButton -> {
+            itemView.fabGoLink -> {
                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(postModel.addressLink))
                 startActivity(browserIntent)
             }
-            itemView.delLinkButton -> {
+            itemView.fabDelButton -> {
                 db.collection("SuperApp").document(postModel.docName)
                     .delete()
                     .addOnSuccessListener {
@@ -209,7 +220,7 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
                     }
                     .addOnFailureListener { e -> Log.w("Delete", "Error deleting document", e) }
             }
-            itemView.linkItemCard -> {
+            itemView.fabEditLink -> {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 addLink.visibility = View.GONE
                 changeLink.visibility = View.VISIBLE
@@ -217,8 +228,6 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
                 addressLink.setText(postModel.addressLink)
                 commentLink.setText(postModel.commentLink)
                 documName = postModel.docName
-
-
             }
         }
 
@@ -241,5 +250,6 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
         val id: String? = null,
         val docName: String? = null
     )
+
 
 }
