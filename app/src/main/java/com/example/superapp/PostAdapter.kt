@@ -1,17 +1,14 @@
 package com.example.superapp
 
-import android.content.Intent
-import android.net.Uri
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.dynamiclinks.ktx.dynamicLinks
-import com.google.firebase.dynamiclinks.ktx.shortLinkAsync
-import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.link_item.*
+import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.link_item.view.*
+
 
 private const val POST_TYPE_DESC: Int = 0
 private const val POST_TYPE_IMAGE: Int = 1
@@ -29,9 +26,23 @@ class PostAdapter(
             clickListener: (PostModel, View) -> Unit
         ) {
 
-            itemView.linkName.text = postModel.linkName
+            //itemView.linkName.text = postModel.linkName
             itemView.linkAddress.text = postModel.addressLink
             itemView.commentTextView2.text = postModel.commentLink
+
+
+            val handler = Handler()
+            val runnable = Runnable {
+
+
+                Glide
+                    .with(itemView.context)
+                    .load("https://www.google.com/s2/favicons?sz=64&domain_url=" + postModel.addressLink)
+                    .circleCrop()
+                    .into(itemView.imageView4)
+
+            }
+            handler.postDelayed(runnable, 200)
 
 
             itemView.fabMenu.setOnClickListener {
@@ -56,9 +67,9 @@ class PostAdapter(
             }
 
             itemView.setOnClickListener {
-                if (itemView.commentTextView2.isVisible){
+                if (itemView.commentTextView2.isVisible) {
                     itemView.commentTextView2.visibility = View.GONE
-                }else{
+                } else {
                     itemView.commentTextView2.visibility = View.VISIBLE
 
                 }
