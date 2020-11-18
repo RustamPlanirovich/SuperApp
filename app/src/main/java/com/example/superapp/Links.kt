@@ -20,6 +20,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.superapp.dagger.DaggerComponent
+import com.example.superapp.dagger.DaggerDaggerComponent
+import com.example.superapp.dagger.DaggerDaggerComponent.create
+import com.example.superapp.firestore.database
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -37,9 +41,15 @@ import soup.neumorphism.NeumorphFloatingActionButton
 import soup.neumorphism.NeumorphImageButton
 import www.sanju.motiontoast.MotionToast
 import java.util.*
+import javax.inject.Inject
 
 
-class Links : AppCompatActivity(), (PostModel, View) -> Unit {
+class Links : AppCompatActivity() {
+    private val POST_TYPE_DESC: Int = 0
+    private val POST_TYPE_IMAGE: Int = 1
+
+    @Inject
+    lateinit var db: database
 
     //Объявляем BottomSheetBehavior
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
@@ -49,104 +59,42 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
 
     //Объявляем базу данных
     //lateinit var db: FirebaseFirestore
-    lateinit var db: FirebaseFirestore
     lateinit var adapter: FirestoreRecyclerAdapter<FriendsResponse, FriendsHolder>
 
     //Объявляем класс проверки пользователя
     private val firebaseRepo: FirebaseRepo = FirebaseRepo()
 
-    //Объявляем лист для загрузки данных
-    private var postList: List<PostModel> = ArrayList()
-
-    //Объявляем Адаптер для RecyclerView
-    //private val postListAdapter: PostAdapter = PostAdapter(postList, this)
-
     //Объявляем имя документа над которым идет работа (создание удаление редактирование)
     lateinit var documName: String
-
-    //Объявляем имя документа для верного сохранения
-    lateinit var addDocName: Timestamp
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_links)
-        init()
+        DaggerDaggerComponent.create().inject(this)
+        //init()
         //Скрываем ActionBar
         supportActionBar?.hide()
         //Инициализация всего что связано с BottomSheet
         bottomSheetLayout = findViewById<ConstraintLayout>(R.id.bottomSheet)
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
-        //Инициализация базы данных
-        //db = FirebaseFirestore.getInstance()
         //Инициализация recyclerView и привязка адаптера
         recyclerView.layoutManager = LinearLayoutManager(this)
-        //recyclerView.adapter = postListAdapter
 
         allLinks.setOnClickListener {
-            db.disableNetwork()
-                .addOnCompleteListener { Log.d("2", "Error: ") }
-                .addOnFailureListener { e -> Log.w("2", "Error writing document", e) }
-            firebaseRepo.firebaseFirestore.disableNetwork()
+            db.db.disableNetwork()
                 .addOnCompleteListener { Log.d("2", "Error: ") }
                 .addOnFailureListener { e -> Log.w("2", "Error writing document", e) }
         }
         countLinks.setOnClickListener {
-            db.enableNetwork()
-                .addOnSuccessListener { Log.d("3", "Error: ") }
-                .addOnFailureListener { e -> Log.w("3", "Error writing document", e) }
-            firebaseRepo.firebaseFirestore.enableNetwork()
+            db.db.enableNetwork()
                 .addOnSuccessListener { Log.d("3", "Error: ") }
                 .addOnFailureListener { e -> Log.w("3", "Error writing document", e) }
         }
 
         //Проверяем есть ли пользователь с таким номером телефона, если да загружаем данные,
         //если нет регистрируем
-        if (firebaseRepo.getUser() == null) {
-            firebaseRepo.createUser().addOnCompleteListener {
-                if (it.isSuccessful) { getFriendList()}
-                else { ErrorToast("Ошибка", it.exception!!.message.toString())}
-            }
-        } else {
-            getFriendList()
-        }
-
-        //Создаем слушателя и подписываемся на изменения БД в realTime
-//        db.collection("SuperApp")
-//            .whereEqualTo("id", "0")
-//            .addSnapshotListener { value, e ->
-//                if (e != null) {
-//                    ErrorToast("Error",e.message.toString())
-//                    return@addSnapshotListener
-//                }
-//                for (doc in value!!) {
-//                    postList = value.toObjects(PostModel::class.java)
-//                    postListAdapter.postListItem = postList
-//                    postListAdapter.notifyDataSetChanged()
-//                }
-//            }
-
-
-
-//        addLink.setOnClickListener {
-//            addDocName = Timestamp(Date())
-//            val city = Link(
-//                nameLink.text.toString(),
-//                addressLink.text.toString(),
-//                commentLink.text.toString(),
-//                "0",
-//                addDocName.toString()
-//            )
-//
-//            db.collection("SuperApp")
-//                .document(addDocName.toString())
-//                .set(city)
-//                .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully written!") }
-//                .addOnFailureListener { e -> Log.w("TAG", "Error writing document", e) }
-//
-//            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-//        }
-
+        if (firebaseRepo.getUser() == null) else getFriendList()
 
         bottomSheetBehavior.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
@@ -158,12 +106,10 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_COLLAPSED -> {
-                        addLinkButton.visibility = View.VISIBLE
-                        recyclerView.visibility = View.VISIBLE
+
                     }
                     BottomSheetBehavior.STATE_SETTLING -> {
-                        //addLinkButton.visibility = View.GONE
-                        recyclerView.visibility = View.GONE
+
                     }
                 }
             }
@@ -176,107 +122,33 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
         }
-
-
-        changeLink.setOnClickListener {
-
-            val washingtonRef = db.collection("SuperApp").document(documName)
-
-            washingtonRef.update(
-                mapOf(
-                    "linkName" to nameLink.text.toString(),
-                    "addressLink" to addressLink.text.toString(),
-                    "commentLink" to commentLink.text.toString()
-                )
-            ).addOnSuccessListener {}
-                .addOnFailureListener {}
-
-
-        }
-
     }
 
-//    private fun loadPostData() {
-//        firebaseRepo.getPostList().addOnCompleteListener {
-//            if (it.isSuccessful) {
-//                postList = it.result!!.toObjects(PostModel::class.java)
-//                postListAdapter.postListItem = postList
-//                postListAdapter.notifyDataSetChanged()
-//                countLinks.text = postList.size.toString()
-//                Log.d("TAG", "Error: ${postList}")
-//            } else {
-//                Log.d("TAG", "Error: ${it.exception!!.message}")
-//            }
-//        }
-//    }
-
-
-    override fun invoke(postModel: PostModel, itemView: View) {
-
-//        when (itemView) {
-//            itemView.fabGoLink -> {
-//                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(postModel.addressLink))
-//                startActivity(browserIntent)
-//            }
-//            itemView.fabDelButton -> {
-//                db.collection("SuperApp").document(postModel.docName)
-//                    .delete()
-//                    .addOnSuccessListener {
-//                        Log.d(
-//                            "Delete",
-//                            "DocumentSnapshot successfully deleted! + ${postModel.docName}"
-//                        )
-//                    }
-//                    .addOnFailureListener { e -> Log.w("Delete", "Error deleting document", e) }
-//            }
-//            itemView.fabEditLink -> {
-//                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-//                addLink.visibility = View.GONE
-//                changeLink.visibility = View.VISIBLE
-//                nameLink.setText(postModel.linkName)
-//                addressLink.setText(postModel.addressLink)
-//                commentLink.setText(postModel.commentLink)
-//                documName = postModel.docName
-//            }
-//        }
-    }
-
-    fun ErrorToast(title: String, message: String){
-        MotionToast.darkToast(this,
+    fun ErrorToast(title: String, message: String) {
+        MotionToast.darkToast(
+            this,
             title,
             message,
             MotionToast.TOAST_ERROR,
             MotionToast.GRAVITY_BOTTOM,
             MotionToast.LONG_DURATION,
-            ResourcesCompat.getFont(this,R.font.helvetica_regular))
-    }
-
-
-//    data class Link(
-//        val linkName: String? = null,
-//        val addressLink: String? = null,
-//        val commentLink: String? = null,
-//        val id: String? = null,
-//        val docName: String? = null
-//    )
-
-    private fun init() {
-        //recyclerView.layoutManager = GridLayoutManager(applicationContext, 2)
-        db = FirebaseFirestore.getInstance()
+            ResourcesCompat.getFont(this, R.font.helvetica_regular)
+        )
     }
 
     private fun getFriendList() {
-        val query: Query = db.collection("SuperApp").orderBy("id", Query.Direction.DESCENDING)
-        val response: FirestoreRecyclerOptions<FriendsResponse> = FirestoreRecyclerOptions.Builder<FriendsResponse>()
-            .setQuery(query, FriendsResponse::class.java)
-            .build()
+        val query: Query = db.db.collection("SuperApp").orderBy("id", Query.Direction.DESCENDING)
+        val response: FirestoreRecyclerOptions<FriendsResponse> =
+            FirestoreRecyclerOptions.Builder<FriendsResponse>()
+                .setQuery(query, FriendsResponse::class.java)
+                .build()
         adapter = object : FirestoreRecyclerAdapter<FriendsResponse, FriendsHolder>(response) {
             override fun onBindViewHolder(
                 holder: FriendsHolder,
                 position: Int,
                 model: FriendsResponse
             ) {
-
+                countLinks.text = adapter.itemCount.toString()
                 holder.textlinkNameUI.text = model.linkName
                 holder.linkAddress.text = model.addressLink
                 holder.textlinkComment.text = model.commentLink
@@ -306,6 +178,7 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
                         holder.fabDelButton.visibility = View.VISIBLE
                     }
                 }
+
                 holder.fabGoLink.setOnClickListener {
                     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(model.addressLink))
                     startActivity(browserIntent)
@@ -320,7 +193,7 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
                     documName = model.docName
                 }
                 holder.fabDelButton.setOnClickListener {
-                    db.collection("SuperApp").document(model.docName)
+                    db.db.collection("SuperApp").document(model.docName)
                         .delete()
                         .addOnSuccessListener {
                             Log.d(
@@ -331,29 +204,57 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
                         .addOnFailureListener { e -> Log.w("Delete", "Error deleting document", e) }
                 }
 
+                changeLink.setOnClickListener {
+                    val washingtonRef = db.db.collection("SuperApp").document(documName)
+                    washingtonRef.update(
+                        mapOf(
+                            "linkName" to nameLink.text.toString(),
+                            "addressLink" to addressLink.text.toString(),
+                            "commentLink" to commentLink.text.toString()
+                        )
+                    ).addOnSuccessListener {}
+                        .addOnFailureListener {}
+                }
+
             }
 
 
             override fun onCreateViewHolder(group: ViewGroup, i: Int): FriendsHolder {
-                val view: View = LayoutInflater.from(group.context)
-                    .inflate(R.layout.link_item, group, false)
-                return FriendsHolder(view)
+                if (i == POST_TYPE_DESC) {
+                    val view: View = LayoutInflater.from(group.context)
+                        .inflate(R.layout.link_item, group, false)
+                    return FriendsHolder(view)
+                } else {
+                    val view: View = LayoutInflater.from(group.context)
+                        .inflate(R.layout.link_item1, group, false)
+                    return FriendsHolder(view)
+                }
             }
 
             override fun onError(e: FirebaseFirestoreException) {
                 Log.e("error", e.message!!)
             }
+
+            override fun getItemViewType(position: Int): Int {
+                return if (adapter.getItem(position).id.toInt() == 0) {
+                    POST_TYPE_DESC
+                } else {
+                    POST_TYPE_IMAGE
+                }
+            }
         }
         adapter.notifyDataSetChanged()
         recyclerView.adapter = adapter
+
     }
+
 
     class FriendsHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView!!) {
 
         var textlinkNameUI: TextView = itemView.findViewById(R.id.linkName)
 
-        var imageView: ImageView  = itemView.findViewById(R.id.imageView4)
+        var imageView: ImageView = itemView.findViewById(R.id.imageView4)
 
         var linkAddress: TextView = itemView.findViewById(R.id.linkAddress)
 
@@ -368,10 +269,7 @@ class Links : AppCompatActivity(), (PostModel, View) -> Unit {
         var fabGoLink: NeumorphImageButton = itemView.findViewById(R.id.fabGoLink)
 
         var commentLink: TextView = itemView.findViewById(R.id.commentTextView2)
-
-        var itemCard: CardView = itemView.findViewById(R.id.linkItemCard)
     }
-
 
 
     override fun onStart() {

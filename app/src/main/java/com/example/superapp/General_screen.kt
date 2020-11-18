@@ -14,5 +14,9 @@ class General_screen : AppCompatActivity() {
             var intentLink = Intent(this,Links::class.java)
             startActivity(intentLink)
         }
+        profile.setOnClickListener {
+            var intentLink = Intent(this,ProfileActivity::class.java)
+            startActivity(intentLink)
+        }
     }
 }

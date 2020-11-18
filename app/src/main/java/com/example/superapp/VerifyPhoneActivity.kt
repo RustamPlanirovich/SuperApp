@@ -10,18 +10,23 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.superapp.dagger.DaggerDaggerComponent
+import com.example.superapp.firestore.database
 import com.google.android.gms.tasks.TaskExecutors
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.*
 import kotlinx.android.synthetic.main.activity_verify_phone.*
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 
 class VerifyPhoneActivity : AppCompatActivity() {
 
+    @Inject
+    lateinit var firebaseAuth: database
+
     private var verificationId: String? = null
-    private var mAuth: FirebaseAuth? = null
     private var progressBar: ProgressBar? = null
     private var editText: OtpTextView? = null
 
@@ -31,7 +36,7 @@ class VerifyPhoneActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_verify_phone)
         supportActionBar?.hide()
-        mAuth = FirebaseAuth.getInstance()
+        DaggerDaggerComponent.create().inject(this)
         progressBar = findViewById(R.id.progressbar)
         editText = findViewById(R.id.editTextCode)
         val phonenumber = intent.getStringExtra("phonenumber")
@@ -53,7 +58,7 @@ class VerifyPhoneActivity : AppCompatActivity() {
     }
 
     private fun signInWithCredential(credential: PhoneAuthCredential) {
-        mAuth!!.signInWithCredential(credential)
+        firebaseAuth.firebaseAuth!!.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val intent = Intent(this, ProfileActivity::class.java)
@@ -75,7 +80,7 @@ class VerifyPhoneActivity : AppCompatActivity() {
 
 
     private fun sendVerificationCode(number: String?){
-        val options = PhoneAuthOptions.newBuilder(mAuth!!)
+        val options = PhoneAuthOptions.newBuilder(firebaseAuth.firebaseAuth!!)
             .setPhoneNumber(number!!)
             .setTimeout(60L, TimeUnit.SECONDS)
             .setActivity(this)

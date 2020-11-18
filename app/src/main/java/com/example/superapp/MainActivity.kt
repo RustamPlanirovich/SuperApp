@@ -12,12 +12,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.superapp.dagger.DaggerDaggerComponent
+import com.example.superapp.firestore.database
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.android.synthetic.main.activity_main.*
+import javax.inject.Inject
 
 
 class MainActivity : AppCompatActivity() {
 
-
+    @Inject
+    lateinit var firebaseAuth: database
     private var editText: EditText? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,8 +30,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         supportActionBar?.hide()
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-
-
+        DaggerDaggerComponent.create().inject(this)
 
         editText = findViewById(R.id.addressLink)
         findViewById<Button>(R.id.buttonContinue).setOnClickListener(View.OnClickListener {
@@ -44,9 +48,10 @@ class MainActivity : AppCompatActivity() {
         })
 
     }
+
     override fun onStart() {
         super.onStart()
-        if (FirebaseAuth.getInstance().currentUser != null) {
+        if (firebaseAuth.firebaseAuth.currentUser != null) {
             val intent = Intent(this, General_screen::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
