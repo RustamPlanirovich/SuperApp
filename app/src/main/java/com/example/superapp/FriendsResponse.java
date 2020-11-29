@@ -7,16 +7,18 @@ public class FriendsResponse {
     private String commentLink;
     private String docName;
     private String id;
+    private String createTime;
 
     public FriendsResponse() {
     }
 
-    public FriendsResponse(String addressLink, String commentLink, String linkName, String docName, String id) {
+    public FriendsResponse(String addressLink, String commentLink, String linkName, String docName, String id, String createTime) {
         this.linkName = linkName;
         this.addressLink = addressLink;
         this.commentLink = commentLink;
         this.docName = docName;
         this.id = id;
+        this.createTime = createTime;
     }
 
     public String getAddressLink() {
@@ -54,4 +56,8 @@ public class FriendsResponse {
     public String getId() {return id;}
 
     public void setId(String id) { this.id = id;}
+
+    public String getCreateTime() {return createTime;}
+
+    public void setCreateTime(String createTime) { this.createTime = createTime;}
 }

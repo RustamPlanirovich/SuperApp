@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">SuperApp</string>
     <string name="vertical_ellipsis">&#8942;</string>
+    <string name="send_to">SEND</string>
 </resources>

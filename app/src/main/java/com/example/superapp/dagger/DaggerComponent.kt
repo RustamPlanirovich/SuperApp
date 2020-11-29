@@ -15,4 +15,5 @@ interface DaggerComponent {
     fun inject(act: FirebaseRepo)
     fun inject(act: VerifyPhoneActivity)
     fun inject(act: MainActivity)
+
 }
