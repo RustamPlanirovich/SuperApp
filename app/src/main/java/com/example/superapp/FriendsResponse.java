@@ -1,6 +1,11 @@
 package com.example.superapp;
 
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class FriendsResponse {
     private String linkName;
     private String addressLink;
@@ -8,17 +13,20 @@ public class FriendsResponse {
     private String docName;
     private String id;
     private String createTime;
+    private Map<String, String> tag;
+
 
     public FriendsResponse() {
     }
 
-    public FriendsResponse(String addressLink, String commentLink, String linkName, String docName, String id, String createTime) {
+    public FriendsResponse(String addressLink, String commentLink, String linkName, String docName, String id, String createTime, Map<String, String> tag) {
         this.linkName = linkName;
         this.addressLink = addressLink;
         this.commentLink = commentLink;
         this.docName = docName;
         this.id = id;
         this.createTime = createTime;
+        this.tag = tag;
     }
 
     public String getAddressLink() {
@@ -60,4 +68,9 @@ public class FriendsResponse {
     public String getCreateTime() {return createTime;}
 
     public void setCreateTime(String createTime) { this.createTime = createTime;}
+
+    public Map<String, String> getTag() {return tag;}
+
+    public void setTag(Map<String, String> tag) { this.tag = tag;}
+
 }

@@ -14,12 +14,12 @@
 
 
     <Button
-        android:id="@+id/save"
+        android:id="@+id/tagButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Button" />
 
-    <soup.neumorphism.NeumorphCardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/flat_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/save"
+        app:layout_constraintTop_toBottomOf="@+id/tagButton"
         app:neumorph_shapeType="flat">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -41,6 +41,7 @@
                 android:layout_height="40dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/rounded_edittext"
                 android:ems="10"
@@ -49,24 +50,13 @@
                 android:paddingEnd="10dp"
                 android:textColor="#673AB7"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/searchButton"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <soup.neumorphism.NeumorphImageView
-                android:id="@+id/searchButton"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0"
-                app:srcCompat="@drawable/ic_baseline_search_24" />
-
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </soup.neumorphism.NeumorphCardView>
+    </androidx.cardview.widget.CardView>
 
     <com.michalsvec.singlerowcalendar.calendar.SingleRowCalendar
         android:id="@+id/main_single_row_calendar"
@@ -75,9 +65,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="24dp"
         app:deselection="false"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvDate"
@@ -91,7 +79,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:fontFamily="sans-serif-medium"
-        android:text="SELECT A DATE"
+        android:text="ВЫБЕРИТЕ ДАТУ"
         android:textColor="@color/grey"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -127,5 +115,22 @@
         app:layout_constraintBottom_toBottomOf="@+id/btnRight"
         app:layout_constraintEnd_toStartOf="@+id/btnRight"
         app:layout_constraintTop_toTopOf="@+id/btnRight" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/tagFilter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        app:singleSelection="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_single_row_calendar">
+
+
+    </com.google.android.material.chip.ChipGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

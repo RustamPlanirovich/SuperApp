@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +25,9 @@ import com.example.superapp.firestore.database
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipDrawable
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -47,7 +51,6 @@ import kotlin.random.Random
 class Links : AppCompatActivity() {
     private val POST_TYPE_DESC: Int = 0
     private val POST_TYPE_IMAGE: Int = 1
-    private val POST_TYPE_STICKY: Int = 2
     private val calendar = Calendar.getInstance()
     private var currentMonth = 0
 
@@ -74,7 +77,6 @@ class Links : AppCompatActivity() {
     //Объявляем имя документа над которым идет работа (создание удаление редактирование)
     lateinit var docName: String
 
-    val dateStack: MutableList<String> = ArrayList()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_links)
@@ -87,6 +89,27 @@ class Links : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
             window.statusBarColor = Color.WHITE
+        }
+        val dateStack: MutableList<String> = ArrayList()
+        dateStack.add("Java")
+        dateStack.add("PHP")
+        dateStack.add("Kotlin")
+        dateStack.add("Javascript")
+        dateStack.add("Python")
+
+        val dateStack1: MutableList<String> = ArrayList()
+
+        dateStack.forEach {
+            val chip = Chip(tagFilter.context)
+            chip.text = it
+            chip.setTextColor(Color.parseColor("#673AB7"))
+            chip.isCheckable = true
+            chip.isClickable = true
+            addTagBottom.addView(chip)
+            chip.setOnClickListener {
+                dateStack1.add(chip.text.toString())
+                Log.d("loae", dateStack1.toString())
+            }
         }
 
 
@@ -106,17 +129,17 @@ class Links : AppCompatActivity() {
                 // will be using basic item view
                 return if (isSelected)
                     when (cal[Calendar.DAY_OF_WEEK]) {
-                        Calendar.MONDAY -> R.layout.first_special_selected_calendar_item
-                        Calendar.WEDNESDAY -> R.layout.second_special_selected_calendar_item
-                        Calendar.FRIDAY -> R.layout.third_special_selected_calendar_item
+//                        Calendar.MONDAY -> R.layout.first_special_selected_calendar_item
+//                        Calendar.WEDNESDAY -> R.layout.second_special_selected_calendar_item
+//                        Calendar.FRIDAY -> R.layout.third_special_selected_calendar_item
                         else -> R.layout.selected_calendar_item
                     }
                 else
                 // here we return items which are not selected
                     when (cal[Calendar.DAY_OF_WEEK]) {
-                        Calendar.MONDAY -> R.layout.first_special_calendar_item
-                        Calendar.WEDNESDAY -> R.layout.second_special_calendar_item
-                        Calendar.FRIDAY -> R.layout.third_special_calendar_item
+//                        Calendar.MONDAY -> R.layout.first_special_calendar_item
+//                        Calendar.WEDNESDAY -> R.layout.second_special_calendar_item
+//                        Calendar.FRIDAY -> R.layout.third_special_calendar_item
                         else -> R.layout.calendar_item
                     }
 
@@ -153,35 +176,16 @@ class Links : AppCompatActivity() {
 
 
                 if (isSelected == false) {
-                    dateStack.remove(currentDateAndTime)
-                    var i = 0
-                    if (i < dateStack.size) {
+                    val newQuery = db.firestoreDb.collection("SuperApp")
+                        .orderBy("id")
 
-                        val newQuery = db.firestoreDb.collection("SuperApp")
-                            .orderBy("createTime")
-                            .startAt("${dateStack[i]}")
-                            .endAt("${dateStack[i]}" + "\uf8ff")
+                    // Make new options
+                    val newOptions = FirestoreRecyclerOptions.Builder<FriendsResponse>()
+                        .setQuery(newQuery, FriendsResponse::class.java)
+                        .build()
 
-                        // Make new options
-                        val newOptions = FirestoreRecyclerOptions.Builder<FriendsResponse>()
-                            .setQuery(newQuery, FriendsResponse::class.java)
-                            .build()
-
-                        // Change options of adapter.
-                        adapter.updateOptions(newOptions)
-                        ++i
-                    } else {
-                        val newQuery = db.firestoreDb.collection("SuperApp")
-                            .orderBy("id")
-
-                        // Make new options
-                        val newOptions = FirestoreRecyclerOptions.Builder<FriendsResponse>()
-                            .setQuery(newQuery, FriendsResponse::class.java)
-                            .build()
-
-                        // Change options of adapter.
-                        adapter.updateOptions(newOptions)
-                    }
+                    // Change options of adapter.
+                    adapter.updateOptions(newOptions)
                 }
                 super.whenSelectionChanged(isSelected, position, date)
             }
@@ -196,32 +200,18 @@ class Links : AppCompatActivity() {
                 val createDateAndTime = SimpleDateFormat("dd M yyyy")
                 val currentDateAndTime = createDateAndTime.format(date)
 
-                if (dateStack.contains("$currentDateAndTime")) {
 
-                } else {
-                    dateStack.add("$currentDateAndTime")
-                }
+                val newQuery = db.firestoreDb.collection("SuperApp")
+                    .orderBy("createTime")
+                    .startAt("${currentDateAndTime}")
+                    .endAt("${currentDateAndTime}" + "\uf8ff")
 
-
-                var i = 0
-                while (i < dateStack.size) {
-                    Log.d("lof", "${dateStack}" + "${dateStack.size}")
-
-                    val newQuery = db.firestoreDb.collection("SuperApp")
-                        .orderBy("createTime")
-                        .startAt("${dateStack[i]}")
-                        .endAt("${dateStack[i]}" + "\uf8ff")
-
-                    // Make new options
-                    val newOptions = FirestoreRecyclerOptions.Builder<FriendsResponse>()
-                        .setQuery(newQuery, FriendsResponse::class.java)
-                        .build()
-                    save.setOnClickListener {
-                        // Change options of adapter.
-                        adapter.updateOptions(newOptions)
-                    }
-                    ++i
-                }
+                // Make new options
+                val newOptions = FirestoreRecyclerOptions.Builder<FriendsResponse>()
+                    .setQuery(newQuery, FriendsResponse::class.java)
+                    .build()
+                // Change options of adapter.
+                adapter.updateOptions(newOptions)
 
 
                 // in this example sunday and saturday can't be selected, others can
@@ -241,7 +231,6 @@ class Links : AppCompatActivity() {
             setDates(getFutureDatesOfCurrentMonth())
             includeCurrentDate = true
             deselection = true
-            multiSelection = true
             init()
         }
 
@@ -409,7 +398,8 @@ class Links : AppCompatActivity() {
                 "commentLink" to commentLink.text.toString(),
                 "id" to "0",
                 "docName" to createdTime.toString(),
-                "createTime" to currentDateAndTime
+                "createTime" to currentDateAndTime,
+                "tag" to dateStack1
             )
             db.firestoreDb.collection("SuperApp").document(createdTime.toString())
                 .set(linkForSave)
@@ -436,6 +426,22 @@ class Links : AppCompatActivity() {
                     position: Int,
                     model: FriendsResponse
                 ) {
+
+
+                    model.tag.forEach {
+                        val chip = Chip(holder.tagLayout.context)
+                        chip.text = it.value.toString()
+                        chip.setBackgroundColor(Color.parseColor("#673AB7"))
+                        Log.d("tag", "#${it.key}")
+                        chip.setTextColor(Color.parseColor("#673AB7"))
+                        holder.tagLayout.addView(chip)
+                    }
+
+
+
+
+
+
                     countLinks.text = adapter.itemCount.toString()
                     holder.textlinkNameUI.text = model.linkName
                     holder.linkAddress.text = model.addressLink
@@ -580,15 +586,17 @@ class Links : AppCompatActivity() {
 
         var linkAddress: TextView = itemView.findViewById(R.id.linkAddress)
 
-        var fabMenu: FloatingActionButton = itemView.findViewById(R.id.fabMenu)
+        var fabMenu: ImageButton = itemView.findViewById(R.id.fabMenu)
 
-        var fabEditLink: FloatingActionButton = itemView.findViewById(R.id.fabEditLink)
+        var fabEditLink: ImageButton = itemView.findViewById(R.id.fabEditLink)
 
-        var fabDelButton: FloatingActionButton = itemView.findViewById(R.id.fabDelButton)
+        var fabDelButton: ImageButton = itemView.findViewById(R.id.fabDelButton)
 
-        var fabGoLink: FloatingActionButton = itemView.findViewById(R.id.fabGoLink)
+        var fabGoLink: ImageButton = itemView.findViewById(R.id.fabGoLink)
 
         var createDateAndTime: TextView = itemView.findViewById(R.id.dateAndTime)
+
+        var tagLayout: ChipGroup = itemView.findViewById(R.id.tagItemFilter)
 
     }
 
