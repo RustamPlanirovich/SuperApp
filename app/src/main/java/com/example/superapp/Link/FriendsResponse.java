@@ -1,4 +1,4 @@
-package com.example.superapp;
+package com.example.superapp.Link;
 
 
 import java.util.ArrayList;

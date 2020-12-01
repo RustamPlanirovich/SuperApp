@@ -1,4 +1,4 @@
-package com.example.superapp
+package com.example.superapp.Link
 
 import com.example.superapp.dagger.DaggerDaggerComponent
 import com.example.superapp.firestore.database

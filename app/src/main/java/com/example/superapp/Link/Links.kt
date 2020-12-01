@@ -1,4 +1,4 @@
-package com.example.superapp
+package com.example.superapp.Link
 
 import android.content.Intent
 import android.graphics.Color
@@ -20,15 +20,15 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.superapp.MyCustomDialog
+import com.example.superapp.R
 import com.example.superapp.dagger.DaggerDaggerComponent.create
 import com.example.superapp.firestore.database
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipDrawable
 import com.google.android.material.chip.ChipGroup
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
@@ -45,7 +45,6 @@ import net.vrgsoft.layoutmanager.RollingLayoutManager
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
-import kotlin.random.Random
 
 
 class Links : AppCompatActivity() {
@@ -171,8 +170,7 @@ class Links : AppCompatActivity() {
                 tvDay.text = DateUtils.getDayName(date)
                 val cal = Calendar.getInstance()
                 cal.time = date
-                val createDateAndTime = SimpleDateFormat("dd M yyyy")
-                val currentDateAndTime = createDateAndTime.format(date)
+
 
 
                 if (isSelected == false) {
@@ -228,7 +226,8 @@ class Links : AppCompatActivity() {
             calendarViewManager = myCalendarViewManager
             calendarChangesObserver = myCalendarChangesObserver
             calendarSelectionManager = mySelectionManager
-            setDates(getFutureDatesOfCurrentMonth())
+            //setDates(getFutureDatesOfCurrentMonth())
+
             includeCurrentDate = true
             deselection = true
             init()
@@ -408,7 +407,6 @@ class Links : AppCompatActivity() {
         }
     }
 
-
     fun getFriendList() {
 
         val query: Query =
@@ -427,8 +425,9 @@ class Links : AppCompatActivity() {
                     model: FriendsResponse
                 ) {
 
-
+                    holder.tagLayout.removeAllViewsInLayout()
                     model.tag.forEach {
+
                         val chip = Chip(holder.tagLayout.context)
                         chip.text = it.value.toString()
                         chip.setBackgroundColor(Color.parseColor("#673AB7"))
@@ -436,10 +435,6 @@ class Links : AppCompatActivity() {
                         chip.setTextColor(Color.parseColor("#673AB7"))
                         holder.tagLayout.addView(chip)
                     }
-
-
-
-
 
 
                     countLinks.text = adapter.itemCount.toString()
@@ -572,7 +567,8 @@ class Links : AppCompatActivity() {
                 }
             }
 
-        adapter.notifyDataSetChanged()
+        // adapter.notifyDataSetChanged()
+        adapter.notifyItemChanged(adapter.itemCount)
         recyclerView.adapter = adapter
     }
 

@@ -1,7 +1,7 @@
 package com.example.superapp.dagger
 
-import com.example.superapp.FirebaseRepo
-import com.example.superapp.Links
+import com.example.superapp.Link.FirebaseRepo
+import com.example.superapp.Link.Links
 import com.example.superapp.MainActivity
 import com.example.superapp.VerifyPhoneActivity
 import com.example.superapp.firestore.database

@@ -3,6 +3,7 @@ package com.example.superapp
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.superapp.Link.Links
 import kotlinx.android.synthetic.main.activity_general_screen.*
 
 class General_screen : AppCompatActivity() {
@@ -11,7 +12,7 @@ class General_screen : AppCompatActivity() {
         setContentView(R.layout.activity_general_screen)
 
         linkButton.setOnClickListener {
-            var intentLink = Intent(this,Links::class.java)
+            var intentLink = Intent(this, Links::class.java)
             startActivity(intentLink)
         }
         profile.setOnClickListener {
