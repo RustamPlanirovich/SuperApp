@@ -112,4 +112,6 @@ dependencies {
 
     implementation 'com.github.VRGsoftUA:RollingLayoutManager:1.0'
 
+    implementation 'com.eukaprotech.xmlprocessor:xmlprocessor:1.0.0@aar'
+
 }

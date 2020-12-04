@@ -38,9 +38,9 @@ import com.michalsvec.singlerowcalendar.calendar.SingleRowCalendarAdapter
 import com.michalsvec.singlerowcalendar.selection.CalendarSelectionManager
 import com.michalsvec.singlerowcalendar.utils.DateUtils
 import kotlinx.android.synthetic.main.activity_links.*
+import kotlinx.android.synthetic.main.calendar_item.view.*
 import kotlinx.android.synthetic.main.link_add_bottom_sheet.*
 import kotlinx.android.synthetic.main.link_filter_bottom_sheet.*
-import kotlinx.android.synthetic.main.second_special_selected_calendar_item.view.*
 import net.vrgsoft.layoutmanager.RollingLayoutManager
 import java.text.SimpleDateFormat
 import java.util.*

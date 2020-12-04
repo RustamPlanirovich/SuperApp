@@ -19,5 +19,10 @@ class General_screen : AppCompatActivity() {
             var intentLink = Intent(this,ProfileActivity::class.java)
             startActivity(intentLink)
         }
+
+        musicForProgramming.setOnClickListener {
+            var intentLink = Intent(this,Music::class.java)
+            startActivity(intentLink)
+        }
     }
 }
